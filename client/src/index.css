@@ -1,3 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  * {
+    font-family: "Inter";
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    @apply bg-light-gray  dark:bg-dark;
+  }
+
+  .scrollbar-whitebg::-webkit-scrollbar {
+    @apply bg-white  dark:bg-dark;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-primary rounded-md;
+  }
+}

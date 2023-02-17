@@ -18,6 +18,7 @@ module.exports = {
         "success": "#66BB6A",
         "blue-gray": "#90A4AE",
         primary: "#3F51B5",
+        "semiblack": "rgba(0,0,0,0.5)"
       }
     },
   },
