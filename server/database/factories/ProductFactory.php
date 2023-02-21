@@ -17,7 +17,7 @@ class ProductFactory extends Factory
     public function definition()
     {
         return [
-            "code" => $this->faker->unique()->name(),
+            "id" => $this->faker->unique()->name(),
             "name" => $this->faker->name(),
             "cost" => $this->faker->randomFloat(4, 500, 1000),
             "price" => $this->faker->randomFloat(4, 500, 1000),

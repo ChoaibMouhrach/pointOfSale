@@ -5,27 +5,46 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use Illuminate\Http\Request as Request;
 
 class CategoryController extends Controller
 {
+
+    public $possible_fields = ["id", "name", "created_at", "updated_at"];
+    public $possible_relations = ["products"];
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-    }
+        $paginate = $request->input("paginate");
+        $search = $request->input("search");
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $fields = $request->input("fields");
+        $relations = $request->input("relations");
+
+        $categories = new Category();
+
+        if ($relations) {
+            $categories = handle_relations($relations, $this->possible_relations, $categories);
+        }
+
+        if ($fields) {
+            $fields = handle_fields($fields, $this->possible_fields, $fields);
+        }
+
+        if ($search) {
+            $categories = $categories->where("name", "like", "%$search%");
+        }
+
+        if ($paginate) {
+            return $categories->paginate($paginate);
+        }
+
+        return $categories->get();
     }
 
     /**
@@ -36,7 +55,13 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $category = Category::create([
+            "name" => $validated["name"]
+        ]);
+
+        return $category;
     }
 
     /**
@@ -45,20 +70,23 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show(Request $request, $id)
     {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Category $category)
-    {
-        //
+        $fields = $request->input("fields");
+        $relations = $request->input("relations");
+
+        $category = new Category();
+
+        if ($relations) {
+            $category = handle_relations($relations, $this->possible_relations, $category);
+        }
+
+        if ($fields) {
+            $category = handle_fields($fields, $this->possible_fields, $category);
+        }
+
+        return $category->findOrFail($id);
     }
 
     /**
@@ -70,7 +98,11 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        //
+        $validated = $request->validated();
+
+        $category->update($validated);
+
+        return $category;
     }
 
     /**
@@ -81,6 +113,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        return response(null, 204);
     }
 }

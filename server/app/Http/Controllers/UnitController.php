@@ -5,27 +5,44 @@ namespace App\Http\Controllers;
 use App\Models\Unit;
 use App\Http\Requests\StoreUnitRequest;
 use App\Http\Requests\UpdateUnitRequest;
+use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
+
+    public $possible_fields = ["id", "name", "shortname", "created_at", "updated_at"];
+    public $possible_relations = ["products"];
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-    }
+        $paginate = $request->input("paginate");
+        $search = $request->input("search");
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $relations = $request->input("relations");
+        $fields = $request->input('fields');
+
+        $units = new Unit();
+
+        if ($relations) {
+            $units = handle_relations($relations, $this->possible_relations, $units);
+        }
+
+        if ($fields) {
+            $units = handle_fields($fields, $this->possible_fields, $units);
+        }
+
+        if ($search) {
+            $units = $units->where("name", "like", "%$search%")->orWhere("shortname", "like", "%$search%");
+        }
+
+        if ($paginate) return $units->paginate($paginate);
+
+        return $units->get();
     }
 
     /**
@@ -36,7 +53,12 @@ class UnitController extends Controller
      */
     public function store(StoreUnitRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        return Unit::create([
+            "name" => $validated["name"],
+            "shortname" => $validated["shortname"]
+        ]);
     }
 
     /**
@@ -45,20 +67,23 @@ class UnitController extends Controller
      * @param  \App\Models\Unit  $unit
      * @return \Illuminate\Http\Response
      */
-    public function show(Unit $unit)
+    public function show(Request $request, $id)
     {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Unit  $unit
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Unit $unit)
-    {
-        //
+        $relations = $request->input("relations");
+        $fields = $request->input("fields");
+
+        $unit = new Unit();
+
+        if ($relations) {
+            $unit = handle_relations($relations, $this->possible_relations, $unit);
+        }
+
+        if ($fields) {
+            $unit = handle_fields($fields, $this->possible_fields, $unit);
+        }
+
+        return $unit->first();
     }
 
     /**
@@ -70,7 +95,9 @@ class UnitController extends Controller
      */
     public function update(UpdateUnitRequest $request, Unit $unit)
     {
-        //
+        $validated = $request->validated();
+        $unit->update($validated);
+        return $unit;
     }
 
     /**
@@ -81,6 +108,7 @@ class UnitController extends Controller
      */
     public function destroy(Unit $unit)
     {
-        //
+        $unit->delete();
+        return response("", 204);
     }
 }

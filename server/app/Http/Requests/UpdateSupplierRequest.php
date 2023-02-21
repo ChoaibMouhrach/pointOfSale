@@ -13,7 +13,7 @@ class UpdateSupplierRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,10 @@ class UpdateSupplierRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            "name" => ["nullable"],
+            "email" => ["nullable", "email", "unique:suppliers,email"],
+            "vat" => ["nullable", "unique:suppliers,vat"],
+            "phone" => ["nullable", "unique:suppliers,phone"],
         ];
     }
 }

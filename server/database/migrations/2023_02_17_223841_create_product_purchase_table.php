@@ -18,9 +18,8 @@ return new class extends Migration
             $table->double("total_cost");
             $table->double("quantity");
             $table->string("product_id");
+            $table->foreign("product_id")->references('id')->on("products")->onDelete("cascade");
             $table->foreignId("purchase_id")->constrained("purchases")->onDelete("cascade");
-            $table->foreignId("supplier_id")->constrained("suppliers")->onDelete("cascade");
-            $table->foreign('product_id')->references('code')->on('products');
             $table->timestamps();
         });
     }

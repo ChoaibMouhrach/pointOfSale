@@ -13,7 +13,7 @@ class UpdateSettingRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,9 @@ class UpdateSettingRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            "currency" => ["nullable"],
+            "company_name" => ["nullable"],
+            "image" => ["nullable"]
         ];
     }
 }

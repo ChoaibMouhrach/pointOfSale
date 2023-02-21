@@ -5,27 +5,43 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+
+    public $possible_fields = ["id", "name", "cost", "price", "stock", "image", "created_at", "updated_at"];
+    public $possible_relations = ["category", "brand", "unit", "sales", "purchases"];
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Product::paginate(8);
-    }
+        $paginate = $request->input("paginate");
+        $search = $request->input("search");
+        $relations = $request->input("relations");
+        $fields = $request->input("fields");
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $products = new Product();
+
+        if ($relations) {
+            $products = handle_relations($relations, $this->possible_relations, $products);
+        }
+
+        if ($fields) {
+            $products = handle_fields($fields, $this->possible_fields, $products);
+        }
+
+        if ($search) {
+            $products = $products->where("id", $search)->where("name", "like", "%$search%");
+        }
+
+        if ($paginate) return $products->paginate($paginate);
+
+        return $products->get();
     }
 
     /**
@@ -36,7 +52,25 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        if ($request->hasFile("image")) {
+            $validated["image"] = $request->file("image")->store("product_images", "public");
+        }
+
+        $product =  Product::create([
+            "id" => $validated["id"],
+            "name" => $validated["name"],
+            "cost" => $validated["cost"],
+            "price" => $validated["price"],
+            "stock" => $validated["stock"],
+            "unit_id" => $validated["unit_id"],
+            "brand_id" => $validated["brand_id"],
+            "category_id" => $validated["category_id"],
+            "image" => $validated["image"] ?? null
+        ]);
+
+        return $product;
     }
 
     /**
@@ -45,20 +79,22 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show(Request $request, $id)
     {
-        //
-    }
+        $relations = $request->input("relations");
+        $fields = $request->input("fields");
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Product $product)
-    {
-        //
+        $product = new Product();
+
+        if ($relations) {
+            $product = handle_relations($relations, $this->possible_relations,  $product);
+        }
+
+        if ($fields) {
+            $product = handle_fields($fields, $this->possible_fields,  $product);
+        }
+
+        return $product->findOrFail($id);
     }
 
     /**
@@ -70,7 +106,11 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+        $validated = $request->validated();
+
+        $product->validate($validated);
+
+        return $product;
     }
 
     /**
@@ -81,6 +121,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $product->delete();
+        return response(null, 204);
     }
 }

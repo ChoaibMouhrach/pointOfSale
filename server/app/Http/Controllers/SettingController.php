@@ -15,7 +15,7 @@ class SettingController extends Controller
      */
     public function index()
     {
-        //
+        return Setting::first();
     }
 
     /**
@@ -27,7 +27,12 @@ class SettingController extends Controller
      */
     public function update(UpdateSettingRequest $request, Setting $setting)
     {
-        //
-    }
+        $validated = $request->validated();
 
+        $setting = Setting::first();
+
+        $setting->update($validated);
+
+        return $setting;
+    }
 }
