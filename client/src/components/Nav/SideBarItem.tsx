@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import React from "react";
 
 type SideBarItemProps = {
   sidebarOpen: boolean;
@@ -12,7 +13,7 @@ const SideBarItem = ({ sidebarOpen, name, to, icon }: SideBarItemProps) => (
     <Link
       to={to}
       className={`flex gap-2 px-3 items-center w-full h-full ${
-        sidebarOpen ? '' : 'justify-center'
+        sidebarOpen ? "" : "justify-center"
       }`}
     >
       <div className="text-xl">{icon}</div>

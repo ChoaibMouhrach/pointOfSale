@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { MdOutlineMenu } from 'react-icons/md';
-import { Outlet } from 'react-router-dom';
-
-import SideBar from '../components/Nav/SideBar';
+import React, { useState } from "react";
+import { MdOutlineMenu } from "react-icons/md";
+import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
+import SideBar from "../components/Nav/SideBar";
+import { fetchUserConnected } from "../features/slices/userSlice";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSideBarOpen] = useState(true);
   const [sideBarShown, setSideBarShown] = useState(false);
-  // const isConnected = useSelector(fetchConnected);
+  const isConnected = useSelector(fetchUserConnected);
 
-  // if (!isConnected) {
-  // return <Navigate to="/login" />;
-  // }
+  if (!isConnected) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <section className="w-screen h-screen bg-light-gray text-dark transition duration-200 dark:bg-dark dark:text-white flex">
@@ -23,7 +24,7 @@ const DashboardLayout = () => {
       />
       <div
         className={`w-full ${
-          sidebarOpen ? 'lg:w-[calc(100%_-_288px)]' : 'lg:w-[calc(100%_-_80px)]'
+          sidebarOpen ? "lg:w-[calc(100%_-_288px)]" : "lg:w-[calc(100%_-_80px)]"
         }`}
       >
         <div className="w-full">

@@ -31,6 +31,8 @@ class SaleController extends Controller
             $sales = handle_relations($relations, $this->possible_relations, $sales);
         }
 
+        $sales = $sales->withSum("products as total_earnings", "product_sale.total_price")->withSum("products as total_cost", "cost")->withCount("products");
+
         if ($fields) {
             $sales = handle_fields($fields, $this->possible_fields, $sales);
         }

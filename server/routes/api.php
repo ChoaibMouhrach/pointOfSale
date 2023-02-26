@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware("auth:sanctum")->group(function () {
 
     // settings
+    Route::get("profile", [AuthController::class, "profile"]);
+
+    // settings
     Route::get("settings", [SettingController::class, "index"]);
     Route::patch("settings", [SettingController::class, "update"]);
 

@@ -73,7 +73,7 @@ class BrandController extends Controller
     {
 
         $relations = $request->input("relations");
-        $fields = $relations->input("fields");
+        $fields = $request->input("fields");
 
         $brand = new Brand();
 

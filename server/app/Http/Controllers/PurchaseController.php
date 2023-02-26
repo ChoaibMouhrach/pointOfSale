@@ -31,6 +31,8 @@ class PurchaseController extends Controller
             $purchases = handle_relations($relations, $this->possible_relations, $purchases);
         }
 
+        $purchases = $purchases->withSum("products as total_cost", "product_purchase.total_cost")->withCount("products");
+
         if ($fields) {
             $purchases = handle_fields($fields, $this->possible_fields, $purchases);
         }

@@ -1,5 +1,7 @@
-import Title from '../../../components/Title';
+import React from "react";
 
-const CreateSale = () => <Title title="Create Sale" />;
+const CreateSale = () => {
+  return <div>CreateSale</div>;
+};
 
 export default CreateSale;

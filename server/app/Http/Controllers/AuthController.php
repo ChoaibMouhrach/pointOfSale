@@ -21,8 +21,7 @@ class AuthController extends Controller
 
         if (!Hash::check($password, $user->password)) {
             return response([
-                "success" => false,
-                "message" => "Email Or Password are not correct"
+                "message" => "The email or password entered is incorrect."
             ], 400);
         }
 
@@ -38,5 +37,11 @@ class AuthController extends Controller
     {
         $user = User::find(auth("sanctum")->user()->id);
         $user->tokens()->delete();
+    }
+
+    // get authenticated user profile
+    public function profile()
+    {
+        return auth("sanctum")->user();
     }
 }

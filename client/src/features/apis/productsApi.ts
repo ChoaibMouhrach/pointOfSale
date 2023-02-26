@@ -1,31 +1,46 @@
-import api from './api';
+import { generateUrl } from "../../helpers/apiHelpers";
+import { GetParams } from "../../types/Api";
+import { Paginate } from "../../types/Pagination";
+import { Product, StoreProduct, UpdateProduct } from "../../types/Product";
+import api from "./api";
 
 const productsApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getProducts: build.query({
-      query: () => '/products',
+    getProducts: build.query<
+      (Paginate & { data: Product[] }) | Product[],
+      GetParams
+    >({
+      query: ({ relations, fields, page, paginate, search }: GetParams) =>
+        generateUrl({
+          baseUrl: "/products",
+          relations,
+          fields,
+          page,
+          paginate,
+          search,
+        }),
     }),
-    showProduct: build.query({
-      query: (id: number) => `/products/${id}`,
+    showProduct: build.query<Product, string>({
+      query: (id: string) => `/products/${id}`,
     }),
-    storeProduct: build.mutation({
-      query: (body: any) => ({
-        url: '/products',
-        mthod: 'POST',
-        body,
+    storeProduct: build.mutation<Product, FormData>({
+      query: (product: FormData) => ({
+        url: "/products",
+        method: "POST",
+        body: product,
       }),
     }),
-    updateProduct: build.mutation({
-      query: ({ id, data }: { id: number; data: any }) => ({
+    updateProduct: build.mutation<Product, { id: string; product: FormData }>({
+      query: ({ id, product }: { id: string; product: FormData }) => ({
         url: `/products/${id}`,
-        method: 'PATCH',
-        body: data,
+        method: "PATCH",
+        body: product,
       }),
     }),
-    deleteProduct: build.mutation({
-      query: (id: number) => ({
+    deleteProduct: build.mutation<void, string>({
+      query: (id: string) => ({
         url: `/products/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
     }),
   }),

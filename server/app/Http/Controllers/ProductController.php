@@ -36,7 +36,7 @@ class ProductController extends Controller
         }
 
         if ($search) {
-            $products = $products->where("id", $search)->where("name", "like", "%$search%");
+            $products = $products->where("id", $search)->orWhere("name", "like", "%$search%");
         }
 
         if ($paginate) return $products->paginate($paginate);
@@ -108,7 +108,11 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        $product->validate($validated);
+        if ($request->hasFile("image")) {
+            $validated["image"] = $request->file("image")->store("product_images", "public");
+        }
+
+        $product->update($validated);
 
         return $product;
     }

@@ -24,9 +24,9 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            "password" => ["nullable", "min:8", "confirmed"],
             "name" => ["nullable"],
-            "email" => ["nullable", "email", "unique:users,email"]
+            "email" => ["nullable", "email", "unique:users,email"],
+            "password" => ["nullable", "min:8", "confirmed"],
         ];
     }
 }

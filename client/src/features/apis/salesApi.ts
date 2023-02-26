@@ -1,25 +1,40 @@
-import api from './api';
+import { generateUrl } from "../../helpers/apiHelpers";
+import { GetParams } from "../../types/Api";
+import { Sale, SaleProducts, StoreSale } from "../../types/Sale";
+import api from "./api";
 
 const salesApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getSales: build.query({
-      query: () => '/sales',
+    getSales: build.query<SaleProducts, GetParams>({
+      query: ({ fields, search, paginate, page, relations }: GetParams) =>
+        generateUrl({
+          baseUrl: "/sales",
+          fields,
+          search,
+          paginate,
+          page,
+          relations,
+        }),
     }),
-    showSale: build.query({
+    showSale: build.query<Sale, number>({
       query: (id: number) => `/sales/${id}`,
     }),
-    storeSale: build.mutation({
-      query: (data: any) => ({ url: '/sales', method: 'POST', body: data }),
-    }),
-    updateSale: build.mutation({
-      query: ({ id, data }: { id: number; data: any }) => ({
-        url: `/sales/${id}`,
-        method: 'PATCH',
-        body: data,
+    storeSale: build.mutation<Sale, StoreSale>({
+      query: (sale: StoreSale) => ({
+        url: "/sales",
+        method: "POST",
+        body: sale,
       }),
     }),
-    deleteSale: build.mutation({
-      query: (id: number) => ({ url: `/sales/${id}`, method: 'DELETE' }),
+    updateSale: build.mutation<Sale, { id: number; sale: StoreSale }>({
+      query: ({ id, sale }: { id: number; sale: StoreSale }) => ({
+        url: `/sales/${id}`,
+        method: "PATCH",
+        body: sale,
+      }),
+    }),
+    deleteSale: build.mutation<void, number>({
+      query: (id: number) => ({ url: `/sales/${id}`, method: "DELETE" }),
     }),
   }),
 });

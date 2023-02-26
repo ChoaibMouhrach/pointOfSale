@@ -1,14 +1,14 @@
-import api from './api';
+import api from "./api";
 
 const settingsApi = api.injectEndpoints({
   endpoints: (build) => ({
     getSettings: build.query({
-      query: () => '/settings',
+      query: () => "/settings",
     }),
     updateSettings: build.mutation({
       query: (data: any) => ({
-        url: '/settings',
-        method: 'PATCH',
+        url: "/settings",
+        method: "PATCH",
         body: data,
       }),
     }),

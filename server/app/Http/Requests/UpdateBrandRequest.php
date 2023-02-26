@@ -24,7 +24,7 @@ class UpdateBrandRequest extends FormRequest
     public function rules()
     {
         return [
-            "name" => ["nullable", "max:125"]
+            "name" => ["nullable", "max:125", "unique:brands,name"]
         ];
     }
 }

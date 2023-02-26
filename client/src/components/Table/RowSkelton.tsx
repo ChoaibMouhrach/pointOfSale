@@ -1,3 +1,5 @@
+import React from "react";
+
 type RowSkeltonProps = {
   column_length: number;
 };

@@ -1,25 +1,37 @@
-import api from './api';
+import { generateUrl } from "../../helpers/apiHelpers";
+import { GetParams } from "../../types/Api";
+import { Paginate } from "../../types/Pagination";
+import { StoreUnit, Unit, UpdateUnit } from "../../types/Unit";
+import api from "./api";
 
 const unitsApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getUnits: build.query({
-      query: () => '/units',
+    getUnits: build.query<(Paginate & { data: Unit[] }) | Unit[], GetParams>({
+      query: ({ relations, fields, search, paginate, page }: GetParams) =>
+        generateUrl({
+          baseUrl: "/units",
+          relations,
+          fields,
+          search,
+          paginate,
+          page,
+        }),
     }),
-    showUnit: build.query({
+    showUnit: build.query<Unit, number>({
       query: (id: number) => `/units/${id}`,
     }),
-    storeUnit: build.mutation({
-      query: (data: any) => ({ url: '/units', method: 'POST', body: data }),
+    storeUnit: build.mutation<Unit, StoreUnit>({
+      query: (unit: any) => ({ url: "/units", method: "POST", body: unit }),
     }),
-    updateUnit: build.query({
-      query: ({ id, data }: { id: number; data: any }) => ({
+    updateUnit: build.mutation<Unit, { id: number; unit: UpdateUnit }>({
+      query: ({ id, unit }: { id: number; unit: UpdateUnit }) => ({
         url: `/units/${id}`,
-        method: 'PATCH',
-        body: data,
+        method: "PATCH",
+        body: unit,
       }),
     }),
-    deleteUnit: build.query({
-      query: (id: number) => ({ url: `/units/${id}`, method: 'DELETE' }),
+    deleteUnit: build.mutation<void, number>({
+      query: (id: number) => ({ url: `/units/${id}`, method: "DELETE" }),
     }),
   }),
 });
@@ -28,6 +40,6 @@ export const {
   useGetUnitsQuery,
   useShowUnitQuery,
   useStoreUnitMutation,
-  useUpdateUnitQuery,
-  useDeleteUnitQuery,
+  useUpdateUnitMutation,
+  useDeleteUnitMutation,
 } = unitsApi;

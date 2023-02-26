@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
-import { Link } from 'react-router-dom';
+import { MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 type SideBarDropDownProps = {
   sidebarOpen: boolean;
@@ -31,7 +31,7 @@ const SideBarDropDown = ({
   return (
     <li
       className={`transition duration-100 uppercase ${
-        open ? 'bg-light-gray dark:bg-dark-gray rounded-md' : ''
+        open ? "bg-light-gray dark:bg-dark-gray rounded-md" : ""
       }`}
     >
       <button
@@ -39,7 +39,7 @@ const SideBarDropDown = ({
           setOpen(!open);
         }}
         className={`${
-          open ? 'bg-primary text-white dark:text-light-gray' : ''
+          open ? "bg-primary text-white dark:text-light-gray" : ""
         } hover:bg-primary h-12 font-semibold rounded-md justify-center  hover:text-white dark:text-light-gray flex gap-2 px-3 items-center w-full`}
       >
         <div className="text-xl">{icon}</div>
@@ -47,12 +47,12 @@ const SideBarDropDown = ({
           <div className="flex items-center justify-between w-full uppercase ">
             <span>{name}</span>
 
-            <div className={`text-xl ${open ? 'rotate-90' : ''}`} />
+            <div className={`text-xl ${open ? "rotate-90" : ""}`} />
             <MdOutlineKeyboardArrowRight />
           </div>
         )}
       </button>
-      <div className={`${open ? ' p-2 rounded-md' : 'h-0 overflow-hidden'}  `}>
+      <div className={`${open ? " p-2 rounded-md" : "h-0 overflow-hidden"}  `}>
         <ul className="flex flex-col gap-2">
           {childrens.map((child, index) => (
             <li
@@ -62,7 +62,7 @@ const SideBarDropDown = ({
               <Link
                 to={child.to}
                 className={`flex w-full h-full items-center ${
-                  sidebarOpen ? 'gap-2 px-3' : 'justify-center'
+                  sidebarOpen ? "gap-2 px-3" : "justify-center"
                 }`}
               >
                 <div className="text-xl">{child.icon}</div>
