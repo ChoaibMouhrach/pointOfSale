@@ -16,8 +16,8 @@ const salesApi = api.injectEndpoints({
           relations,
         }),
     }),
-    showSale: build.query<Sale, number>({
-      query: (id: number) => `/sales/${id}`,
+    showSale: build.query<SaleProducts, number>({
+      query: (id: number) => `/sales/${id}?relations=products`,
     }),
     storeSale: build.mutation<Sale, StoreSale>({
       query: (sale: StoreSale) => ({
@@ -39,10 +39,4 @@ const salesApi = api.injectEndpoints({
   }),
 });
 
-export const {
-  useGetSalesQuery,
-  useShowSaleQuery,
-  useStoreSaleMutation,
-  useUpdateSaleMutation,
-  useDeleteSaleMutation,
-} = salesApi;
+export const { useGetSalesQuery, useShowSaleQuery, useStoreSaleMutation, useUpdateSaleMutation, useDeleteSaleMutation } = salesApi;

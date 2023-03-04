@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string("currency");
             $table->string("company_name");
-            $table->string("image");
+            $table->string("vat");
             $table->timestamps();
         });
     }

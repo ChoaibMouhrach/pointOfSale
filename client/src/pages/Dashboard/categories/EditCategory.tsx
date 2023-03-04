@@ -8,11 +8,11 @@ import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Loader from "../../../components/Loaders/Loader";
 import Title from "../../../components/Title";
-import {
-  useShowCategoryQuery,
-  useUpdateCategoryMutation,
-} from "../../../features/apis/categoriesApi";
+import { useShowCategoryQuery, useUpdateCategoryMutation } from "../../../features/apis/categoriesApi";
 import { Category, UpdateCategory } from "../../../types/Category";
+import { useTranslation } from "react-i18next";
+import GlobalError from "../../../components/GlobalError";
+import Form from "../../../components/Form/Form";
 
 const initialValues = {
   name: "",
@@ -27,11 +27,13 @@ const EditCategory = () => {
   const [globalMessage, setGlobalMessage] = useState<string>("");
   const navigate = useNavigate();
 
-  const [updateCategory, { isLoading: isUpdatingCategoryLoading }] =
-    useUpdateCategoryMutation();
-  const { data: category, isSuccess } = useShowCategoryQuery<
-    UseQueryHookResult<any> & { data: Category }
-  >(Number(id), {
+  const { t } = useTranslation();
+  const [updateCategory, { isLoading: isUpdatingCategoryLoading }] = useUpdateCategoryMutation();
+  const {
+    data: category,
+    isSuccess: isCategorySuccess,
+    isLoading: isCategoryLoading,
+  } = useShowCategoryQuery<UseQueryHookResult<any> & { data: Category }>(Number(id), {
     refetchOnMountOrArgChange: true,
   });
 
@@ -54,11 +56,9 @@ const EditCategory = () => {
         };
 
         if (errors.data.errors) {
-          Object.entries(errors.data.errors).forEach(
-            ([key, errors]: [string, string[]]) => {
-              formik.setFieldError(key, errors[0]);
-            }
-          );
+          Object.entries(errors.data.errors).forEach(([key, errors]: [string, string[]]) => {
+            formik.setFieldError(key, errors[0]);
+          });
         }
 
         if (errors.data.message) {
@@ -70,38 +70,26 @@ const EditCategory = () => {
 
   return (
     <div>
-      <Title title="Edit Category" />
+      <Title title={String(t("edit")) + " " + String(t("category"))} />
 
-      {isSuccess && (
-        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-          {globalMessage && (
-            <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-              {globalMessage}
-            </div>
-          )}
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <GlobalError global_message={globalMessage} />
           <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.name && formik.errors.name
-                ? formik.errors.name
-                : ""
-            }
+            skelton={isCategoryLoading}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
             name="name"
-            defaultValue={category.name}
-            placeholder="Category Name"
+            defaultValue={isCategorySuccess ? category.name : ""}
+            placeholder={String(t("name"))}
           />
 
           <div className="max-w-lg">
-            <Button
-              disabled={isUpdatingCategoryLoading}
-              content={
-                isUpdatingCategoryLoading ? <Loader /> : "Update Category"
-              }
-            />
+            <Button disabled={isUpdatingCategoryLoading} content={isUpdatingCategoryLoading ? <Loader /> : String(t("update")) + " " + String(t("category"))} />
           </div>
-        </form>
-      )}
+        </div>
+      </Form>
     </div>
   );
 };

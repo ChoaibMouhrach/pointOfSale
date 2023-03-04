@@ -17,6 +17,9 @@ import { useGetBrandsQuery } from "../../../features/apis/brandsApi";
 import { Brand } from "../../../types/Brand";
 import { useGetUnitsQuery } from "../../../features/apis/unitsApi";
 import { Unit } from "../../../types/Unit";
+import { useTranslation } from "react-i18next";
+import Form from "../../../components/Form/Form";
+import GlobalError from "../../../components/GlobalError";
 
 const initialValues = {
   id: "",
@@ -43,39 +46,35 @@ const validationSchema = object({
 });
 
 const CreateProduct = () => {
-  const [global_message, setGlobal_message] = useState<string | null>("");
+  const [global_message, setGlobal_message] = useState<string>("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  const [storeProduct, { isLoading, isSuccess }] = useStoreProductMutation();
-  const { data: categories, isSuccess: isCategoriesSuccess } =
-    useGetCategoriesQuery<UseQueryHookResult<any> & { data: Category[] }>({});
-
-  const { data: brands, isSuccess: isBrandsSuccess } = useGetBrandsQuery<
-    UseQueryHookResult<any> & { data: Brand[] }
-  >({});
-
-  const { data: units, isSuccess: isUnitSuccess } = useGetUnitsQuery<
-    UseQueryHookResult<any> & { data: Unit[] }
-  >({});
+  const [storeProduct, { isLoading: isProductLoading, isSuccess: isProductLoaded }] = useStoreProductMutation();
+  const {
+    data: categories,
+    isSuccess: isCategoriesSuccess,
+    isLoading: isCategoriesLoading,
+  } = useGetCategoriesQuery<UseQueryHookResult<any> & { data: Category[] }>({});
+  const { data: brands, isSuccess: isBrandsSuccess, isLoading: isBrandsLoading } = useGetBrandsQuery<UseQueryHookResult<any> & { data: Brand[] }>({});
+  const { data: units, isSuccess: isUnitSuccess, isLoading: isUnitsLoading } = useGetUnitsQuery<UseQueryHookResult<any> & { data: Unit[] }>({});
 
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: async (data: StoreProduct, { setSubmitting }) => {
       setSubmitting(false);
-      setGlobal_message(null);
+      setGlobal_message("");
       const formData = new FormData();
 
-      Object.entries(data).forEach(
-        ([key, value]: [string, string | number | Blob]) => {
-          if (key === "image") {
-            const file: Blob = value as Blob;
-            formData.append(key, file);
-          } else {
-            formData.append(key, String(value));
-          }
+      Object.entries(data).forEach(([key, value]: [string, string | number | Blob]) => {
+        if (key === "image") {
+          const file: Blob = value as Blob;
+          formData.append(key, file);
+        } else {
+          formData.append(key, String(value));
         }
-      );
+      });
 
       const response = await storeProduct(formData);
 
@@ -90,157 +89,129 @@ const CreateProduct = () => {
         }
 
         if (errors.data.errors) {
-          Object.entries(errors.data.errors).forEach(
-            ([key, value]: [string, string[]]) => {
-              formik.setFieldError(key, value[0]);
-            }
-          );
+          Object.entries(errors.data.errors).forEach(([key, value]: [string, string[]]) => {
+            formik.setFieldError(key, value[0]);
+          });
         }
       }
     },
   });
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isProductLoaded) {
       navigate("/products");
     }
-  }, [isSuccess]);
+  }, [isProductLoaded]);
 
   return (
     <div>
-      <Title title="Create Product" />
-      {isCategoriesSuccess && isBrandsSuccess && isUnitSuccess && (
-        <form
-          onSubmit={formik.handleSubmit}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white dark:bg-transparent p-4 dark:p-0 border-2 dark:border-none border-gray rounded-md"
-        >
-          {global_message && (
-            <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-              {global_message}
-            </div>
-          )}
-          <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.id && formik.errors.id ? formik.errors.id : ""
-            }
-            name="id"
-            placeholder="id"
-          />
-          <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.name && formik.errors.name
-                ? formik.errors.name
-                : ""
-            }
-            name="name"
-            placeholder="name"
-          />
-          <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.cost && formik.errors.cost
-                ? formik.errors.cost
-                : ""
-            }
-            name="cost"
-            placeholder="cost"
-            type="number"
-          />
-          <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.price && formik.errors.price
-                ? formik.errors.price
-                : ""
-            }
-            name="price"
-            placeholder="price"
-            type="number"
-          />
-          <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.stock && formik.errors.stock
-                ? formik.errors.stock
-                : ""
-            }
-            name="stock"
-            placeholder="stock"
-            type="number"
-          />
-          <div className="flex flex-col justify-center bg-gray-200 dark:bg-dark-gray px-4 rounded-md">
-            <input
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                if (event.target.files)
-                  formik.setFieldValue("image", event.target.files[0]);
-              }}
+      <Title title={t("total") + " " + t("product")} />
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <GlobalError global_message={global_message} />
+          <div className="grid lg:grid-cols-3 gap-4">
+            <Input
+              skelton={isCategoriesLoading && isBrandsLoading && isUnitsLoading}
+              onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              type="file"
-              name="image"
+              error={formik.touched.id && formik.errors.id ? formik.errors.id : ""}
+              name="id"
+              placeholder={String(t("id"))}
             />
-          </div>
+            <Input
+              skelton={isCategoriesLoading && isBrandsLoading && isUnitsLoading}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
+              name="name"
+              placeholder={String(t("name"))}
+            />
+            <Input
+              skelton={isCategoriesLoading && isBrandsLoading && isUnitsLoading}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.cost && formik.errors.cost ? formik.errors.cost : ""}
+              name="cost"
+              placeholder={String(t("cost"))}
+              type="number"
+            />
+            <Input
+              skelton={isCategoriesLoading && isBrandsLoading && isUnitsLoading}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.price && formik.errors.price ? formik.errors.price : ""}
+              name="price"
+              placeholder={String(t("price"))}
+              type="number"
+            />
+            <Input
+              skelton={isCategoriesLoading && isBrandsLoading && isUnitsLoading}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.stock && formik.errors.stock ? formik.errors.stock : ""}
+              name="stock"
+              placeholder={String(t("stock"))}
+              type="number"
+            />
+            <div className="flex flex-col justify-center bg-gray-200 dark:bg-dark-gray px-4 rounded-md">
+              <input
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  if (event.target.files) formik.setFieldValue("image", event.target.files[0]);
+                }}
+                onBlur={formik.handleBlur}
+                type="file"
+                name="image"
+              />
+            </div>
 
-          <InputDropDown
-            placeholder="Choose Unit"
-            handleChange={(value: string) =>
-              formik.setFieldValue("unit_id", value)
-            }
-            error={
-              formik.touched.unit_id && formik.errors.unit_id
-                ? formik.errors.unit_id
-                : ""
-            }
-            data={units.map((unit: Unit) => ({
-              id: unit.id,
-              name: unit.name,
-            }))}
-          />
-          <InputDropDown
-            placeholder="Choose Brand"
-            handleChange={(value: string) =>
-              formik.setFieldValue("brand_id", value)
-            }
-            error={
-              formik.touched.brand_id && formik.errors.brand_id
-                ? formik.errors.brand_id
-                : ""
-            }
-            data={brands.map((brand: Brand) => ({
-              id: brand.id,
-              name: brand.name,
-            }))}
-          />
-          <InputDropDown
-            placeholder="Choose Category"
-            handleChange={(value: string) =>
-              formik.setFieldValue("category_id", value)
-            }
-            error={
-              formik.touched.category_id && formik.errors.category_id
-                ? formik.errors.category_id
-                : ""
-            }
-            data={categories.map((category: Category) => ({
-              id: category.id,
-              name: category.name,
-            }))}
-          />
-          <div>
-            <Button
-              disabled={isLoading}
-              type="submit"
-              content={isLoading ? <Loader /> : "Create Product"}
+            <InputDropDown
+              skelton={isUnitsLoading}
+              placeholder={t("unit")}
+              onChange={(value: string) => formik.setFieldValue("unit_id", value)}
+              error={formik.touched.unit_id && formik.errors.unit_id ? formik.errors.unit_id : ""}
+              data={
+                isUnitSuccess
+                  ? units.map((unit: Unit) => ({
+                      id: unit.id,
+                      name: unit.name,
+                    }))
+                  : []
+              }
+            />
+            <InputDropDown
+              skelton={isBrandsLoading}
+              placeholder={String(t("brand"))}
+              onChange={(value: string) => formik.setFieldValue("brand_id", value)}
+              error={formik.touched.brand_id && formik.errors.brand_id ? formik.errors.brand_id : ""}
+              data={
+                isBrandsSuccess
+                  ? brands.map((brand: Brand) => ({
+                      id: brand.id,
+                      name: brand.name,
+                    }))
+                  : []
+              }
+            />
+            <InputDropDown
+              skelton={isBrandsLoading}
+              placeholder={String(t("category"))}
+              onChange={(value: string) => formik.setFieldValue("category_id", value)}
+              error={formik.touched.category_id && formik.errors.category_id ? formik.errors.category_id : ""}
+              data={
+                isCategoriesSuccess
+                  ? categories.map((category: Category) => ({
+                      id: category.id,
+                      name: category.name,
+                    }))
+                  : []
+              }
             />
           </div>
-        </form>
-      )}
+          <div className=" col-start-1 col-end-4">
+            <Button disabled={isProductLoading} type="submit" content={isProductLoading ? <Loader /> : "Create Product"} />
+          </div>
+        </div>
+      </Form>
     </div>
   );
 };

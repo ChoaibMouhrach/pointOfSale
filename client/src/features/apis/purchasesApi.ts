@@ -1,20 +1,12 @@
 import { generateUrl } from "../../helpers/apiHelpers";
 import { GetParams } from "../../types/Api";
 import { Paginate } from "../../types/Pagination";
-import {
-  Purchase,
-  PurchaseAny,
-  StorePurchase,
-  updatePurchase,
-} from "../../types/Purchases";
+import { Purchase, PurchaseAny, PurchaseProducts, StorePurchase, UpdatePurchase } from "../../types/Purchases";
 import api from "./api";
 
 const purchasesApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getPurchases: build.query<
-      (Paginate & { data: PurchaseAny[] }) | PurchaseAny[],
-      GetParams
-    >({
+    getPurchases: build.query<(Paginate & { data: PurchaseAny[] }) | PurchaseAny[], GetParams>({
       query: ({ relations, paginate, page, search, fields }: GetParams) =>
         generateUrl({
           baseUrl: "/purchases",
@@ -25,8 +17,8 @@ const purchasesApi = api.injectEndpoints({
           search,
         }),
     }),
-    showPurchase: build.query<PurchaseAny, number>({
-      query: (id: number) => `/purchases/${id}`,
+    showPurchase: build.query<PurchaseProducts, number>({
+      query: (id: number) => `/purchases/${id}?relations=products`,
     }),
     storePurchase: build.mutation<Purchase, StorePurchase>({
       query: (purchase: StorePurchase) => ({
@@ -35,11 +27,8 @@ const purchasesApi = api.injectEndpoints({
         body: purchase,
       }),
     }),
-    updatePurchase: build.mutation<
-      Purchase,
-      { id: number; purchase: updatePurchase }
-    >({
-      query: ({ id, purchase }: { id: number; purchase: updatePurchase }) => ({
+    updatePurchase: build.mutation<Purchase, { id: number; purchase: UpdatePurchase }>({
+      query: ({ id, purchase }: { id: number; purchase: UpdatePurchase }) => ({
         url: `/purchases/${id}`,
         method: "PATCH",
         body: purchase,
@@ -54,10 +43,4 @@ const purchasesApi = api.injectEndpoints({
   }),
 });
 
-export const {
-  useGetPurchasesQuery,
-  useShowPurchaseQuery,
-  useStorePurchaseMutation,
-  useUpdatePurchaseMutation,
-  useDeletePurchaseMutation,
-} = purchasesApi;
+export const { useGetPurchasesQuery, useShowPurchaseQuery, useStorePurchaseMutation, useUpdatePurchaseMutation, useDeletePurchaseMutation } = purchasesApi;

@@ -3,10 +3,7 @@ import { useFormik } from "formik";
 import Title from "../../../components/Title";
 import { mixed, number, object, string } from "yup";
 import { UpdateProduct } from "../../../types/Product";
-import {
-  useShowProductQuery,
-  useUpdateProductMutation,
-} from "../../../features/apis/productsApi";
+import { useShowProductQuery, useUpdateProductMutation } from "../../../features/apis/productsApi";
 import { useNavigate, useParams } from "react-router-dom";
 import Input from "../../../components/Input";
 import Button from "../../../components/Button";
@@ -19,6 +16,8 @@ import { Category } from "../../../types/Category";
 import { UseQueryHookResult } from "@reduxjs/toolkit/dist/query/react/buildHooks";
 import { Unit } from "../../../types/Unit";
 import { Brand } from "../../../types/Brand";
+import { useTranslation } from "react-i18next";
+import Form from "../../../components/Form/Form";
 
 const initialValues = {
   id: "",
@@ -44,32 +43,27 @@ const validationSchema = object({
 });
 
 const EditProduct = () => {
-  const [
-    updateProduct,
-    {
-      isSuccess: isUpdatingProductSuccess,
-      isLoading: isUpdatingProductLoading,
-    },
-  ] = useUpdateProductMutation();
+  const { t } = useTranslation();
+  const [updateProduct, { isSuccess: isUpdatingProductSuccess, isLoading: isUpdatingProductLoading }] = useUpdateProductMutation();
   const [global_message, setGlobal_message] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { data: categories, isSuccess: isCategoriesSuccess } =
-    useGetCategoriesQuery<UseQueryHookResult<any> & { data: Category[] }>({});
-  const { data: units, isSuccess: isUnitsSuccess } = useGetCategoriesQuery<
-    UseQueryHookResult<any> & { data: Unit[] }
-  >({});
-  const { data: brands, isSuccess: isBrandsSuccess } = useGetBrandsQuery<
-    UseQueryHookResult<any> & { data: Brand[] }
-  >({});
+  const {
+    data: categories,
+    isSuccess: isCategoriesSuccess,
+    isLoading: isCategoriesLoading,
+  } = useGetCategoriesQuery<UseQueryHookResult<any> & { data: Category[] }>({});
+  const { data: units, isSuccess: isUnitsSuccess, isLoading: isUnitsLoading } = useGetCategoriesQuery<UseQueryHookResult<any> & { data: Unit[] }>({});
+  const { data: brands, isSuccess: isBrandsSuccess, isLoading: isBrandsLoading } = useGetBrandsQuery<UseQueryHookResult<any> & { data: Brand[] }>({});
 
   const { id } = useParams();
-  const { data: product, isSuccess: isProductSuccess } = useShowProductQuery(
-    id ?? "",
-    {
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  const {
+    data: product,
+    isSuccess: isProductSuccess,
+    isLoading: isProductLoading,
+  } = useShowProductQuery(id ?? "", {
+    refetchOnMountOrArgChange: true,
+  });
 
   const formik = useFormik({
     initialValues,
@@ -84,17 +78,15 @@ const EditProduct = () => {
 
       formData.append("__method", "patch");
 
-      Object.entries(data).forEach(
-        ([key, value]: [string, string | number | Blob]) => {
-          if (value) {
-            something_changed = true;
-            if (key === "image") {
-              const file = value as Blob;
-              formData.append(key, file);
-            } else formData.append(key, String(value));
-          }
+      Object.entries(data).forEach(([key, value]: [string, string | number | Blob]) => {
+        if (value) {
+          something_changed = true;
+          if (key === "image") {
+            const file = value as Blob;
+            formData.append(key, file);
+          } else formData.append(key, String(value));
         }
-      );
+      });
 
       if (something_changed) {
         if (id) {
@@ -107,11 +99,9 @@ const EditProduct = () => {
             };
 
             if (errors.data.errors) {
-              Object.entries(errors.data.errors).forEach(
-                ([key, value]: [string, string[]]) => {
-                  formik.setFieldError(key, value[0]);
-                }
-              );
+              Object.entries(errors.data.errors).forEach(([key, value]: [string, string[]]) => {
+                formik.setFieldError(key, value[0]);
+              });
             }
 
             if (errors.data.message) {
@@ -133,86 +123,63 @@ const EditProduct = () => {
 
   return (
     <div>
-      <Title title="Edit Product" />
-      {isProductSuccess &&
-        isCategoriesSuccess &&
-        isProductSuccess &&
-        isUnitsSuccess && (
-          <form
-            onSubmit={formik.handleSubmit}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white dark:bg-transparent p-4 dark:p-0 border-2 dark:border-none border-gray rounded-md"
-          >
-            {global_message && (
-              <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-                {global_message}
-              </div>
-            )}
+      <Title title={String(t("edit")) + " " + String(t("product"))} />
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          {global_message && <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">{global_message}</div>}
+          <div className="grid lg:grid-cols-3 gap-4">
             <Input
-              defaultValue={product?.id ?? ""}
-              handleChange={formik.handleChange}
-              handleBlur={formik.handleBlur}
-              error={
-                formik.touched.id && formik.errors.id ? formik.errors.id : ""
-              }
+              defaultValue={isProductSuccess ? product.id : ""}
+              skelton={isProductLoading}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.id && formik.errors.id ? formik.errors.id : ""}
+              placeholder={String(t("id"))}
               name="id"
-              placeholder="id"
             />
             <Input
+              skelton={isProductLoading}
               defaultValue={product?.name ?? ""}
-              handleChange={formik.handleChange}
-              handleBlur={formik.handleBlur}
-              error={
-                formik.touched.name && formik.errors.name
-                  ? formik.errors.name
-                  : ""
-              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
+              placeholder={String(t("name"))}
               name="name"
-              placeholder="name"
             />
             <Input
-              defaultValue={product?.cost ?? ""}
-              handleChange={formik.handleChange}
-              handleBlur={formik.handleBlur}
-              error={
-                formik.touched.cost && formik.errors.cost
-                  ? formik.errors.cost
-                  : ""
-              }
+              skelton={isProductLoading}
+              value={isProductSuccess ? product.cost : ""}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.cost && formik.errors.cost ? formik.errors.cost : ""}
+              placeholder={String(t("cost"))}
               name="cost"
-              placeholder="cost"
               type="number"
             />
             <Input
-              defaultValue={product?.price ?? ""}
-              handleChange={formik.handleChange}
-              handleBlur={formik.handleBlur}
-              error={
-                formik.touched.price && formik.errors.price
-                  ? formik.errors.price
-                  : ""
-              }
+              skelton={isProductLoading}
+              defaultValue={isProductSuccess ? product.price : ""}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.price && formik.errors.price ? formik.errors.price : ""}
+              placeholder={String(t("price"))}
               name="price"
-              placeholder="price"
               type="number"
             />
             <Input
-              defaultValue={product?.stock ?? ""}
-              handleChange={formik.handleChange}
-              handleBlur={formik.handleBlur}
-              error={
-                formik.touched.stock && formik.errors.stock
-                  ? formik.errors.stock
-                  : ""
-              }
+              skelton={isProductLoading}
+              defaultValue={isProductSuccess ? product.stock : ""}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.stock && formik.errors.stock ? formik.errors.stock : ""}
+              placeholder={String(t("stock"))}
               name="stock"
-              placeholder="stock"
               type="number"
             />
             <div className="flex flex-col justify-center bg-gray-200 dark:bg-dark-gray px-4 rounded-md">
               <input
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  if (event.target.files)
-                    formik.setFieldValue("image", event.target.files[0]);
+                  if (event.target.files) formik.setFieldValue("image", event.target.files[0]);
                 }}
                 onBlur={formik.handleBlur}
                 type="file"
@@ -220,64 +187,66 @@ const EditProduct = () => {
               />
             </div>
             <InputDropDown
-              defaultValue={product.unit_id}
-              data={units.map((unit: Unit) => ({
-                id: unit.id,
-                name: unit.name,
-              }))}
-              handleChange={(value: string) => {
+              skelton={isProductLoading || isUnitsLoading}
+              defaultValue={isProductSuccess ? product.unit_id : ""}
+              data={
+                isUnitsSuccess
+                  ? units.map((unit: Unit) => ({
+                      id: unit.id,
+                      name: unit.name,
+                    }))
+                  : []
+              }
+              onChange={(value: string) => {
                 formik.setFieldValue("unit_id", value);
               }}
-              error={
-                formik.touched.unit_id && formik.errors.unit_id
-                  ? formik.errors.unit_id
-                  : ""
-              }
-              placeholder={"Choose Unit"}
+              error={formik.touched.unit_id && formik.errors.unit_id ? formik.errors.unit_id : ""}
+              placeholder={String(t("unit"))}
             />
             <InputDropDown
-              defaultValue={product.brand_id}
-              data={brands.map((brand: Brand) => ({
-                id: brand.id,
-                name: brand.name,
-              }))}
-              handleChange={(value: string) => {
+              skelton={isProductLoading || isBrandsLoading}
+              defaultValue={isProductSuccess ? product.brand_id : ""}
+              data={
+                isBrandsSuccess
+                  ? brands.map((brand: Brand) => ({
+                      id: brand.id,
+                      name: brand.name,
+                    }))
+                  : []
+              }
+              onChange={(value: string) => {
                 formik.setFieldValue("brand_id", value);
               }}
-              error={
-                formik.touched.brand_id && formik.errors.brand_id
-                  ? formik.errors.brand_id
-                  : ""
-              }
-              placeholder={"Choose Brand"}
+              error={formik.touched.brand_id && formik.errors.brand_id ? formik.errors.brand_id : ""}
+              placeholder={String(t("brand"))}
             />
             <InputDropDown
-              defaultValue={product.category_id}
-              data={categories.map((category: Category) => ({
-                id: category.id,
-                name: category.name,
-              }))}
-              handleChange={(value: string) => {
+              skelton={isProductLoading || isCategoriesLoading}
+              defaultValue={isProductSuccess ? product.category_id : ""}
+              data={
+                isCategoriesSuccess
+                  ? categories.map((category: Category) => ({
+                      id: category.id,
+                      name: category.name,
+                    }))
+                  : []
+              }
+              onChange={(value: string) => {
                 formik.setFieldValue("category_id", value);
               }}
-              error={
-                formik.touched.category_id && formik.errors.category_id
-                  ? formik.errors.category_id
-                  : ""
-              }
-              placeholder={"Choose Category"}
+              error={formik.touched.category_id && formik.errors.category_id ? formik.errors.category_id : ""}
+              placeholder={String(t("category"))}
             />
-            <div>
-              <Button
-                disabled={isUpdatingProductLoading}
-                type="submit"
-                content={
-                  isUpdatingProductLoading ? <Loader /> : "Update Product"
-                }
-              />
-            </div>
-          </form>
-        )}
+          </div>
+          <div>
+            <Button
+              disabled={isUpdatingProductLoading}
+              type="submit"
+              content={isUpdatingProductLoading ? <Loader /> : String(t("update")) + " " + String(t("product"))}
+            />
+          </div>
+        </div>
+      </Form>
     </div>
   );
 };

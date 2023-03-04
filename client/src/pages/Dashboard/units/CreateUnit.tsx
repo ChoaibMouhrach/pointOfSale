@@ -9,6 +9,9 @@ import Loader from "../../../components/Loaders/Loader";
 import Title from "../../../components/Title";
 import { useStoreUnitMutation } from "../../../features/apis/unitsApi";
 import { StoreUnit } from "../../../types/Unit";
+import { useTranslation } from "react-i18next";
+import Form from "../../../components/Form/Form";
+import GlobalError from "../../../components/GlobalError";
 
 const initialValues = {
   name: "",
@@ -23,6 +26,7 @@ const CreateUnit = () => {
   const [globalMessage, setGlobalMessage] = useState("");
   const navigate = useNavigate();
   const [createUnit, { isLoading }] = useStoreUnitMutation();
+  const { t } = useTranslation();
 
   const formik = useFormik({
     initialValues,
@@ -47,11 +51,9 @@ const CreateUnit = () => {
         }
 
         if (errors.data.errors) {
-          Object.entries(errors.data.errors).forEach(
-            ([key, errors]: [string, string[]]) => {
-              formik.setFieldError(key, errors[0]);
-            }
-          );
+          Object.entries(errors.data.errors).forEach(([key, errors]: [string, string[]]) => {
+            formik.setFieldError(key, errors[0]);
+          });
         }
       }
     },
@@ -59,41 +61,30 @@ const CreateUnit = () => {
 
   return (
     <div>
-      <Title title="Create Unit" />
+      <Title title={String(t("create")) + " " + String(t("unit"))} />
 
-      <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-        {globalMessage && (
-          <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-            {globalMessage}
-          </div>
-        )}
-        <Input
-          handleChange={formik.handleChange}
-          handleBlur={formik.handleBlur}
-          name="name"
-          error={
-            formik.touched.name && formik.errors.name ? formik.errors.name : ""
-          }
-          placeholder="Name..."
-        />
-        <Input
-          handleChange={formik.handleChange}
-          handleBlur={formik.handleBlur}
-          name="shortname"
-          error={
-            formik.touched.shortname && formik.errors.shortname
-              ? formik.errors.shortname
-              : ""
-          }
-          placeholder="Short Name..."
-        />
-        <div className="max-w-lg">
-          <Button
-            disabled={isLoading}
-            content={isLoading ? <Loader /> : "Create Unit"}
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <GlobalError global_message={globalMessage} />
+          <Input
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="name"
+            error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
+            placeholder={String(t("name")) + "..."}
           />
+          <Input
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="shortname"
+            error={formik.touched.shortname && formik.errors.shortname ? formik.errors.shortname : ""}
+            placeholder={String(t("shortname")) + "..."}
+          />
+          <div className="max-w-lg">
+            <Button disabled={isLoading} content={isLoading ? <Loader /> : String(t("create")) + String(t("unit"))} />
+          </div>
         </div>
-      </form>
+      </Form>
     </div>
   );
 };

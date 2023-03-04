@@ -9,6 +9,9 @@ import Loader from "../../../components/Loaders/Loader";
 import Title from "../../../components/Title";
 import { useStoreCategoryMutation } from "../../../features/apis/categoriesApi";
 import { StoreCategory } from "../../../types/Category";
+import { useTranslation } from "react-i18next";
+import Form from "../../../components/Form/Form";
+import GlobalError from "../../../components/GlobalError";
 
 const initialValues = {
   name: "",
@@ -22,6 +25,7 @@ const CreateCategory = () => {
   const [globalMessage, setGlobalMessage] = useState("");
   const navigate = useNavigate();
   const [createCategory, { isLoading }] = useStoreCategoryMutation();
+  const { t } = useTranslation();
 
   const formik = useFormik({
     initialValues,
@@ -46,11 +50,9 @@ const CreateCategory = () => {
         }
 
         if (errors.data.errors) {
-          Object.entries(errors.data.errors).forEach(
-            ([key, errors]: [string, string[]]) => {
-              formik.setFieldError(key, errors[0]);
-            }
-          );
+          Object.entries(errors.data.errors).forEach(([key, errors]: [string, string[]]) => {
+            formik.setFieldError(key, errors[0]);
+          });
         }
       }
     },
@@ -58,30 +60,22 @@ const CreateCategory = () => {
 
   return (
     <div>
-      <Title title="Create Category" />
-      <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-        {globalMessage && (
-          <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-            {globalMessage}
-          </div>
-        )}
-
-        <Input
-          handleChange={formik.handleChange}
-          handleBlur={formik.handleBlur}
-          name="name"
-          error={
-            formik.touched.name && formik.errors.name ? formik.errors.name : ""
-          }
-          placeholder="Name..."
-        />
-        <div className="max-w-lg">
-          <Button
-            disabled={isLoading}
-            content={isLoading ? <Loader /> : "Create Category"}
+      <Title title={String(t("create")) + "  " + String(t("category"))} />
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <GlobalError global_message={globalMessage} />
+          <Input
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="name"
+            error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
+            placeholder={String(t("name")) + "..."}
           />
+          <div className="max-w-lg">
+            <Button disabled={isLoading} content={isLoading ? <Loader /> : String(t("create")) + String(t("Category"))} />
+          </div>
         </div>
-      </form>
+      </Form>
     </div>
   );
 };

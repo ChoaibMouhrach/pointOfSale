@@ -155,7 +155,7 @@ const router = createBrowserRouter([
             path: "/cart",
             element: <Cart />,
           },
-          // settings
+          // cart
           {
             path: "/settings",
             element: <Settings />,

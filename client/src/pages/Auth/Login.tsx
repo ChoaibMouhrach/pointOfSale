@@ -11,6 +11,7 @@ import { ValidationError } from "../../types/Validation";
 import { User } from "../../types/User";
 import { setUser } from "../../features/slices/userSlice";
 import { useDispatch } from "react-redux";
+import GlobalError from "../../components/GlobalError";
 
 const initialValues = {
   email: "",
@@ -23,7 +24,7 @@ const validationSchema = yup.object({
 });
 
 const Login = () => {
-  const [global_message, set_global_message] = useState<string | null>(null);
+  const [global_message, set_global_message] = useState<string>("");
   const [login, { isLoading, isError, isSuccess }] = useAuthenticateMutation();
   const dispatch = useDispatch();
 
@@ -33,7 +34,7 @@ const Login = () => {
     onSubmit: async (data: Login, { setSubmitting }) => {
       setSubmitting(false);
 
-      set_global_message(null);
+      set_global_message("");
 
       const response = await login(data);
 
@@ -51,9 +52,7 @@ const Login = () => {
         };
 
         if (error.data.errors) {
-          const errors: [string, string[]][] = Object.entries(
-            error.data.errors
-          );
+          const errors: [string, string[]][] = Object.entries(error.data.errors);
 
           errors.forEach(([error_name, error_value]: [string, string[]]) => {
             formik.setFieldError(error_name, error_value[0]);
@@ -69,44 +68,29 @@ const Login = () => {
 
   return (
     <div className=" w-full h-screen bg-primary flex items-center flex-col gap-4 justify-center">
-      {global_message && (
-        <div className="bg-danger w-full max-w-lg shadow-lg rounded-md flex items-center justify-center h-16 text-white">
-          {global_message}
-        </div>
-      )}
+      <GlobalError global_message={global_message} />
       <div className="w-full max-w-lg bg-white  dark:bg-dark dark:text-light-gray rounded-md shadow-lg p-4 mx-4">
         <div className="flex items-center justify-center  mb-9 mt-6">
           <h2 className="text-2xl font-semibold ">LOGIN</h2>
         </div>
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
           <Input
-            handleBlur={formik.handleBlur}
-            handleChange={formik.handleChange}
-            placeholder="Email Address"
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            error={formik.touched.email && formik.touched.email ? formik.errors.email : ""}
+            placeholder="Email Address..."
             name="email"
             type="email"
-            error={
-              formik.touched.email &&
-              formik.touched.password &&
-              formik.errors.email
-            }
           />
           <Input
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.password &&
-              formik.touched.password &&
-              formik.errors.password
-            }
-            handleChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            error={formik.touched.password && formik.touched.password ? formik.errors.password : ""}
             placeholder="Password"
             name="password"
             type="password"
           />
-          <Button
-            variation={isError ? "error" : isSuccess ? "success" : "default"}
-            content={isLoading ? <Loader /> : "LOGIN"}
-          />
+          <Button variation={isError ? "error" : isSuccess ? "success" : "default"} content={isLoading ? <Loader /> : "LOGIN"} />
         </form>
       </div>
     </div>

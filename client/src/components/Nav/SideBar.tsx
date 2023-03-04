@@ -18,13 +18,14 @@ import {
   MdOutlineWbSunny,
 } from "react-icons/md";
 
-import profile from "../../assets/profile.jpg";
 import SideBarButton from "./SideBarButton";
 import SideBarDropDown from "./SideBarDropDown";
 import SideBarItem from "./SideBarItem";
 import { useLogoutMutation } from "../../features/apis/authApi";
 import { useDispatch } from "react-redux";
 import { deleteUser } from "../../features/slices/userSlice";
+import { setTheme } from "../../features/slices/themeSlice";
+import { useNavigate } from "react-router-dom";
 
 type SideBarProps = {
   sidebarOpen: boolean;
@@ -33,25 +34,23 @@ type SideBarProps = {
   setSideBarShown: (barShown: boolean) => void;
 };
 
-const SideBar = ({
-  sidebarOpen,
-  setSideBarOpen,
-  sideBarShown,
-  setSideBarShown,
-}: SideBarProps) => {
+const SideBar = ({ sidebarOpen, setSideBarOpen, sideBarShown, setSideBarShown }: SideBarProps) => {
   // states
   const [logout] = useLogoutMutation();
   const [mode, setMode] = useState(localStorage.getItem("mode") ?? "light");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   function handleTheme() {
     if (localStorage.getItem("mode") === "dark") {
       window.document.documentElement.className = "";
       setMode("light");
+      dispatch(setTheme("light"));
       localStorage.setItem("mode", "light");
     } else {
       window.document.documentElement.className = "dark";
       setMode("dark");
+      dispatch(setTheme("dark"));
       localStorage.setItem("mode", "dark");
     }
   }
@@ -67,13 +66,7 @@ const SideBar = ({
   }
 
   return (
-    <div
-      className={`z-10 ${
-        sideBarShown
-          ? "fixed lg:static w-full lg:w-auto bg-semiblack h-screen"
-          : "hidden lg:block"
-      }`}
-    >
+    <div className={`z-10 ${sideBarShown ? "fixed lg:static w-full lg:w-auto bg-semiblack h-screen" : "hidden lg:block"}`}>
       <div className="absolute right-0 p-4 lg:hidden">
         <button
           className="text-2xl text-white dark:text-white"
@@ -91,37 +84,19 @@ const SideBar = ({
       >
         <div className="h-20 flex items-center p-4 justify-center gap-4 font-bold uppercase">
           <div className="w-12 relative ">
-            <img
-              onClick={handleClose}
-              src={profile}
-              alt=""
-              className="w-12 h-12 rounded-full object-cover"
-            />
-            <div className="w-4 h-4 bg-primary absolute bottom-0 right-0 rounded-full border-2 border-white" />
+            <div onClick={handleClose} className="w-12 h-12 bg-yellow-400 rounded-full object-cover"></div>
           </div>
           {sidebarOpen && (
             <div className="flex-1 flex flex-col">
-              <span className="text-primary dark:text-light-gray">
-                {`${"Choaib Mouhrach".substring(0, 10)}...`}
-              </span>
+              <span className="text-primary dark:text-light-gray">{`${"mouhrach.com"}`}</span>
               <span className="text-blue-gray">Owner</span>
             </div>
           )}
         </div>
         <div className="p-4 flex-1 overflow-y-scroll scrollbar scrollbar-whitebg">
           <ul className="flex flex-col gap-4 text-dark">
-            <SideBarItem
-              name="Dashboard"
-              to="/"
-              icon={<MdOutlineDashboard />}
-              sidebarOpen={sidebarOpen}
-            />
-            <SideBarItem
-              name="Cart"
-              to="/cart"
-              icon={<MdOutlineShoppingCart />}
-              sidebarOpen={sidebarOpen}
-            />
+            <SideBarItem name="Dashboard" to="/" icon={<MdOutlineDashboard />} sidebarOpen={sidebarOpen} />
+            <SideBarItem name="Cart" to="/cart" icon={<MdOutlineShoppingCart />} sidebarOpen={sidebarOpen} />
 
             <SideBarDropDown
               name="Products"
@@ -263,28 +238,12 @@ const SideBar = ({
         </div>
         <div className="p-4">
           <ul className="flex flex-col gap-4">
-            <SideBarItem
-              name="Settings"
-              to="/settings"
-              icon={<MdOutlineSettings />}
-              sidebarOpen={sidebarOpen}
-            />
-            <SideBarButton
-              name="LOG OUT"
-              handleClick={handleLogout}
-              icon={<MdOutlineExitToApp />}
-              sidebarOpen={sidebarOpen}
-            />
+            <SideBarButton name="SETTINGS" handleClick={() => navigate("/settings")} icon={<MdOutlineSettings />} sidebarOpen={sidebarOpen} />
+            <SideBarButton name="LOG OUT" handleClick={handleLogout} icon={<MdOutlineExitToApp />} sidebarOpen={sidebarOpen} />
             <SideBarButton
               name={`${mode === "dark" ? "light" : "dark"} MODE`}
               handleClick={handleTheme}
-              icon={
-                mode === "dark" ? (
-                  <MdOutlineWbSunny className="text-xl" />
-                ) : (
-                  <MdOutlineNightlight className="text-xl" />
-                )
-              }
+              icon={mode === "dark" ? <MdOutlineWbSunny className="text-xl" /> : <MdOutlineNightlight className="text-xl" />}
               sidebarOpen={sidebarOpen}
             />
           </ul>

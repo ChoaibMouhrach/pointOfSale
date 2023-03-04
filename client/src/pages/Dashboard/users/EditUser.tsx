@@ -6,10 +6,7 @@ import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Loader from "../../../components/Loaders/Loader";
 import Title from "../../../components/Title";
-import {
-  useShowUserQuery,
-  useUpdateUserMutation,
-} from "../../../features/apis/usersApi";
+import { useShowUserQuery, useUpdateUserMutation } from "../../../features/apis/usersApi";
 import { UpdateUser } from "../../../types/User";
 import { ValidationError } from "../../../types/Validation";
 
@@ -31,8 +28,7 @@ const EditUser = () => {
 
   const { id } = useParams();
   const { data: user, isSuccess } = useShowUserQuery(Number(id));
-  const [updateUser, { isLoading: isUpdatingUserLoading }] =
-    useUpdateUserMutation();
+  const [updateUser, { isLoading: isUpdatingUserLoading }] = useUpdateUserMutation();
 
   const formik = useFormik({
     initialValues,
@@ -40,12 +36,7 @@ const EditUser = () => {
     onSubmit: async (data: UpdateUser, { setSubmitting }) => {
       setSubmitting(false);
 
-      if (
-        data.email ||
-        data.name ||
-        data.password ||
-        data.password_confirmation
-      ) {
+      if (data.email || data.name || data.password || data.password_confirmation) {
         if (data.password || data.password_confirmation) {
           if (data.password !== data.password_confirmation) {
             formik.setFieldError("password", "Passwords does not match");
@@ -58,8 +49,6 @@ const EditUser = () => {
         Object.entries(data).forEach(([key, value]: [string, string]) => {
           if (value) requestBody[key] = value;
         });
-
-        console.log(data);
 
         const response = await updateUser({
           id: Number(id),
@@ -81,11 +70,9 @@ const EditUser = () => {
           }
 
           if (errors.data.errors) {
-            Object.entries(errors.data.errors).forEach(
-              ([key, errors]: [string, string[]]) => {
-                formik.setFieldError(key, errors[0]);
-              }
-            );
+            Object.entries(errors.data.errors).forEach(([key, errors]: [string, string[]]) => {
+              formik.setFieldError(key, errors[0]);
+            });
           }
         }
       } else {
@@ -102,63 +89,39 @@ const EditUser = () => {
           onSubmit={formik.handleSubmit}
           className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white dark:bg-transparent p-4 dark:p-0 border-2 dark:border-none border-gray rounded-md"
         >
-          {globalMessage && (
-            <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-              {globalMessage}
-            </div>
-          )}
+          {globalMessage && <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">{globalMessage}</div>}
           <Input
             name="name"
             defaultValue={user.name}
-            handleBlur={formik.handleBlur}
-            handleChange={formik.handleChange}
-            error={
-              formik.touched.name && formik.errors.name
-                ? formik.errors.name
-                : ""
-            }
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
             placeholder="Name"
           />
           <Input
             name="email"
             defaultValue={user.email}
-            handleBlur={formik.handleBlur}
-            handleChange={formik.handleChange}
-            error={
-              formik.touched.email && formik.errors.email
-                ? formik.errors.email
-                : ""
-            }
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            error={formik.touched.email && formik.errors.email ? formik.errors.email : ""}
             placeholder="Email"
           />
           <Input
             name="password"
-            handleBlur={formik.handleBlur}
-            handleChange={formik.handleChange}
-            error={
-              formik.touched.password && formik.errors.password
-                ? formik.errors.password
-                : ""
-            }
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            error={formik.touched.password && formik.errors.password ? formik.errors.password : ""}
             placeholder="Password"
-          />{" "}
+          />
           <Input
             name="password_confirmation"
-            handleBlur={formik.handleBlur}
-            handleChange={formik.handleChange}
-            error={
-              formik.touched.password_confirmation &&
-              formik.errors.password_confirmation
-                ? formik.errors.password_confirmation
-                : ""
-            }
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            error={formik.touched.password_confirmation && formik.errors.password_confirmation ? formik.errors.password_confirmation : ""}
             placeholder="Password confirmation"
           />
           <div>
-            <Button
-              disabled={isUpdatingUserLoading}
-              content={isUpdatingUserLoading ? <Loader /> : "Update Supplier"}
-            />
+            <Button disabled={isUpdatingUserLoading} content={isUpdatingUserLoading ? <Loader /> : "Update Supplier"} />
           </div>
         </form>
       )}

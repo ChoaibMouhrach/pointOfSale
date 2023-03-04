@@ -1,19 +1,19 @@
 import { UseQueryHookResult } from "@reduxjs/toolkit/dist/query/react/buildHooks";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import Search from "../../../components/Search";
 import Table from "../../../components/Table/Table";
+import TablePagination from "../../../components/Table/TablePagination";
 import Title from "../../../components/Title";
-import {
-  useDeleteUnitMutation,
-  useGetUnitsQuery,
-} from "../../../features/apis/unitsApi";
+import { useDeleteUnitMutation, useGetUnitsQuery } from "../../../features/apis/unitsApi";
 import { Paginate } from "../../../types/Pagination";
-import { Headers } from "../../../types/Table";
 import { Unit } from "../../../types/Unit";
 
 const Units = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const paginate = 8;
+  const { t } = useTranslation();
 
   const [deleteUnit] = useDeleteUnitMutation();
   const {
@@ -22,23 +22,21 @@ const Units = () => {
     isLoading,
     isFetching,
     refetch,
-  } = useGetUnitsQuery<
-    UseQueryHookResult<any> & { data: Paginate & { data: Unit[] } }
-  >({
+  } = useGetUnitsQuery<UseQueryHookResult<any> & { data: Paginate & { data: Unit[] } }>({
     page,
     search,
     paginate,
   });
 
-  const headers: Headers = [
-    { name: "id", sort: true },
-    { name: "name", sort: true },
-    { name: "short Name", sort: true },
-    { name: "created At", sort: true },
+  const headers = [
+    { key: "id", name: String(t("id")), sort: true },
+    { key: "name", name: String(t("name")), sort: true },
+    { key: "shortname", name: String(t("shortname")), sort: true },
+    { key: "createdAt", name: String(t("createdAt")), sort: true },
   ];
 
   function getRows(): {
-    id: number;
+    id: string;
     shortname: string;
     created_at: string;
     name: string;
@@ -46,7 +44,7 @@ const Units = () => {
     if (isSuccess) {
       return units.data.map((unit) => {
         return {
-          id: unit.id,
+          id: String(unit.id),
           name: unit.name,
           shortname: unit.shortname,
           created_at: new Date(unit.created_at).toLocaleString(),
@@ -63,21 +61,13 @@ const Units = () => {
   }
 
   return (
-    <div>
-      <Title title="Units" />
-      <Table
-        headers={headers}
-        rows={getRows()}
-        is_loading={isLoading || isFetching}
-        page_count={units?.last_page ?? null}
-        current_page={page}
-        displayDelete={true}
-        displayEdit={true}
-        set_page={setPage}
-        setSearch={setSearch}
-        search={search}
-        handleDelete={handleDelete}
-      />
+    <div className="flex flex-col gap-4">
+      <Title title={String(t("units"))} />
+      <Search setSearch={setSearch} />
+      <div className="bg-white dark:bg-dark-gray rounded-md">
+        <Table isLoading={isLoading || isFetching} headers={headers} rows={getRows()} handleDelete={handleDelete} displayEdit={true} />
+        {isSuccess && <TablePagination setPage={setPage} page={page} lastPage={units.last_page} />}
+      </div>
     </div>
   );
 };

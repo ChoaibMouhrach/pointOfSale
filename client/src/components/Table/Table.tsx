@@ -1,60 +1,47 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { MdAdd, MdRemove, MdOutlineEdit, MdDeleteOutline, MdArrowUpward } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
-import { ActiveColumn } from "../../types/Table";
-import Pagination from "../Pagination";
-import EmptyRow from "./EmptyRow";
-import Heading from "./Heading";
-import Row from "./Row";
-import RowSkelton from "./RowSkelton";
-import Search from "./Search";
-
-type TableProps = {
-  headers: { name: string; sort: boolean }[];
-  rows: any[] | null;
-  is_loading: boolean;
-  page_count: number | null;
-  current_page: number;
-  set_page: React.Dispatch<React.SetStateAction<number>>;
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
-  search: string;
-  displayEdit?: boolean;
-  displayDelete?: boolean;
-  handleDelete?: (id: string) => void;
-  handleAdd?: (columns: string[]) => void;
+type Header = {
+  name: string;
+  sort: boolean;
+  key: string;
 };
 
-const Table = ({
-  headers,
-  search,
-  displayEdit,
-  displayDelete,
-  handleDelete,
-  setSearch,
-  rows,
-  is_loading,
-  page_count,
-  current_page,
-  handleAdd,
-  set_page,
-}: TableProps) => {
-  const [active_column, set_active_column] = useState<ActiveColumn>({
+type TableProps = {
+  headers: Header[];
+  rows: { id: string; [key: string]: string | number | JSX.Element }[];
+  displayEdit?: boolean;
+  handleAdd?: (data: { id: string; [key: string]: string | number | JSX.Element }) => void;
+  handleRemove?: (id: string) => void;
+  handleDelete?: (id: string) => void;
+  isLoading: boolean;
+};
+
+const Table = ({ headers, rows, isLoading, handleAdd, displayEdit, handleRemove, handleDelete }: TableProps) => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [activeColumn, setActiveColumn] = useState<{ name: null | string; direction: "asc" | "desc" }>({
     name: null,
     direction: "asc",
   });
 
   // sort the whole column
   const handleSort = (key: string) => {
-    if (active_column.name === key) {
-      const direction = active_column.direction === "asc" ? "desc" : "asc";
+    if (activeColumn.name === key) {
+      const direction = activeColumn.direction === "asc" ? "desc" : "asc";
 
-      set_active_column({
+      setActiveColumn({
         name: key,
         direction,
       });
 
       if (rows) {
         if (direction === "desc") {
-          rows.sort((a, b) => (a[key] > b[key] ? -1 : 1));
+          rows.sort((a, b) => {
+            return a[key] > b[key] ? -1 : 1;
+          });
         } else {
           rows.sort((a, b) => (a[key] > b[key] ? 1 : -1));
         }
@@ -67,72 +54,96 @@ const Table = ({
       rows.sort((a, b) => (a[key] > b[key] ? 1 : -1));
     }
 
-    set_active_column({
+    setActiveColumn({
       name: key,
       direction: "asc",
     });
   };
 
-  function getSkelton() {
-    const res: React.ReactNode[] = [];
-
+  function getSkeltonRows() {
+    let skeltonRows = [];
     for (let i = 0; i < 8; i++) {
-      res.push(<RowSkelton key={i} column_length={headers.length + 1} />);
+      skeltonRows.push(
+        <tr key={i} className="border-t-4 border-white dark:border-dark">
+          <td className=" bg-gray-300 dark:bg-dark-gray rounded-md" colSpan={headers.length + 1}>
+            <div className="h-10"></div>
+          </td>
+        </tr>
+      );
     }
-
-    return res;
+    return skeltonRows;
   }
 
   return (
-    <div className="grid w-full">
-      <Search search={search} setSearch={setSearch} />
-
-      <div className="w-full overflow-x-scroll scrollbar">
-        <table className="w-full">
-          <thead className="text-light-gray">
-            <tr>
-              {headers.map((header, index: number) => (
-                <Heading
-                  key={header.name}
-                  round_tl={index === 0}
-                  name={header.name}
-                  active_column={active_column}
-                  handleSort={header.sort ? handleSort : undefined}
-                />
-              ))}
-              <Heading round_tr name="options" active_column={active_column} />
-            </tr>
-          </thead>
-          <tbody className="bg-white text-dark transition duration-200 dark:text-light-gray dark:bg-dark-gray ">
-            {is_loading && getSkelton()}
-            {!is_loading &&
-              rows &&
-              rows.map((row, id) => (
-                <Row
-                  displayEdit={displayEdit ?? false}
-                  displayDelete={displayDelete ?? false}
-                  handleDelete={handleDelete}
-                  key={id}
-                  handleAdd={handleAdd}
-                  columns={Object.values(row)}
-                />
-              ))}
-            {!is_loading && rows && !rows.length && (
-              <EmptyRow column_length={headers.length + 1} />
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="w-full h-12 rounded-b-md bg-primary flex justify-center lg:justify-end px-3">
-        {!is_loading && page_count && (
-          <Pagination
-            current_page={current_page}
-            set_page={set_page}
-            page_count={page_count}
-          />
-        )}
-      </div>
+    <div className="w-full overflow-x-scroll scrollbar">
+      <table className="w-full">
+        <thead>
+          <tr>
+            {headers.map((header: Header, index: number) => {
+              return (
+                <th key={index} onClick={() => handleSort(header.key)} className={`bg-primary text-white ${index === 0 ? "rounded-l-md" : ""}`}>
+                  <button className={`tracking-wide text-left p-3 w-full outline-none flex items-center gap-4`}>
+                    <span>{header.name}</span>
+                    <MdArrowUpward
+                      className={`${activeColumn.name === header.key ? "opacity-100" : "opacity-0"} ${
+                        activeColumn.direction === "desc" ? "rotate-180" : ""
+                      } transition duration-300`}
+                    />
+                  </button>
+                </th>
+              );
+            })}
+            <th className={`p-3 bg-primary text-white tracking-wide text-left rounded-r-md`}>{t("options")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {!isLoading &&
+            (rows.length ? (
+              rows.map((row, index: number) => {
+                return (
+                  <tr key={index}>
+                    {Object.entries(row).map(([key, value]: [string, any], index: number) => {
+                      return (
+                        <td key={index} className={`p-3 tracking-wide `}>
+                          {value}
+                        </td>
+                      );
+                    })}
+                    <td className="flex gap-4 items-center p-3">
+                      {handleAdd && (
+                        <button onClick={() => handleAdd(row)} className="text-success text-2xl">
+                          <MdAdd />
+                        </button>
+                      )}
+                      {displayEdit && (
+                        <button onClick={() => navigate(`${row.id}/edit`)} className="text-success text-2xl">
+                          <MdOutlineEdit />
+                        </button>
+                      )}
+                      {handleRemove && (
+                        <button onClick={() => handleRemove(row.id)} className="text-danger text-2xl">
+                          <MdRemove />
+                        </button>
+                      )}
+                      {handleDelete && (
+                        <button onClick={() => handleDelete(row.id)} className="text-danger text-2xl">
+                          <MdDeleteOutline />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={headers.length + 1} className="p-3 tracking-wide text-center">
+                  Empty At the moment
+                </td>
+              </tr>
+            ))}
+          {isLoading && getSkeltonRows()}
+        </tbody>
+      </table>
     </div>
   );
 };

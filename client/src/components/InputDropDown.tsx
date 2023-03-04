@@ -8,25 +8,22 @@ type Data = {
 
 type InputDropDownProps = {
   data: Data[];
-  handleChange: (value: string) => void;
+  onChange: (value: string) => void;
   error?: string;
   defaultValue?: string | number;
   placeholder: string;
+  skelton?: boolean;
 };
 
-const InputDropDown = ({
-  data,
-  handleChange,
-  error,
-  defaultValue,
-  placeholder,
-}: InputDropDownProps) => {
+const InputDropDown = ({ skelton, data, onChange, error, defaultValue, placeholder }: InputDropDownProps) => {
+  if (skelton) {
+    return <div className="h-14 bg-gray-300 dark:bg-dark-gray rounded-md animate-pulse border-2 border-gray-300 dark:border-dark-gray"></div>;
+  }
+
   const [filteredData, setFilteredData] = useState(data);
   const container = useRef(null);
   const searchInput = useRef<HTMLInputElement | null>(null);
-  const [search, setSearch] = useState(
-    defaultValue ? String(defaultValue) : ""
-  );
+  const [search, setSearch] = useState(defaultValue ? String(defaultValue) : "");
   const [open, setOpen] = useState<boolean>(false);
   const resultInput = useRef<HTMLInputElement>(null);
 
@@ -36,7 +33,7 @@ const InputDropDown = ({
       setSearch(String(name));
       if (resultInput.current) {
         resultInput.current.value = String(id);
-        handleChange(String(id));
+        onChange(String(id));
       }
     }
   }
@@ -45,9 +42,7 @@ const InputDropDown = ({
     setFilteredData(
       data.filter((data: Data) => {
         if (typeof data.name === "string" && typeof search === "string") {
-          return data.name
-            .toLocaleLowerCase()
-            .includes(search.toLocaleLowerCase());
+          return data.name.toLocaleLowerCase().includes(search.toLocaleLowerCase());
         }
 
         return data.name == search;
@@ -96,7 +91,7 @@ const InputDropDown = ({
       <Input
         error={error ?? ""}
         rf={searchInput}
-        handleChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setSearch(e.target.value);
         }}
         placeholder={placeholder + "..."}
@@ -110,9 +105,7 @@ const InputDropDown = ({
                   key={data.id}
                   onClick={() => handleClick(data)}
                   className={`p-3 hover:bg-primary hover:text-white rounded-md cursor-pointer ${
-                    search === data.name || defaultValue === data.name
-                      ? "bg-primary text-white"
-                      : ""
+                    search === data.name || defaultValue === data.name ? "bg-primary text-white" : ""
                   }`}
                 >
                   {data.name}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEventHandler } from "react";
 
 type ButtonProps = {
   content: React.ReactNode;
@@ -9,31 +9,22 @@ type ButtonProps = {
   disabled?: boolean;
 };
 
-const Button = ({
-  className,
-  disabled,
-  handleClick,
-  content,
-  type,
-  variation,
-}: ButtonProps) => {
-  let theme = "bg-primary hover:bg-light-primary";
+const Button = ({ className, disabled, handleClick, content, type, variation }: ButtonProps) => {
+  let theme = disabled ? "bg-light-primary" : "bg-primary hover:bg-light-primary";
   const color = "text-white";
 
   switch (variation) {
     case "error":
-      theme = "bg-danger hover:bg-light-danger";
+      theme = disabled ? "bg-light-danger" : "bg-danger hover:bg-light-danger";
       break;
     case "success":
-      theme = "bg-success hover:bg-light-success";
+      theme = disabled ? "bg-light-success" : "bg-success hover:bg-light-success";
       break;
   }
 
   return (
     <button
-      className={`w-full py-2 px-4 rounded-md flex items-center justify-center h-12 ${theme} ${color} ${
-        className ?? ""
-      }`}
+      className={`w-full py-2 px-4 rounded-md flex items-center justify-center h-12 ${theme} ${color} ${className ?? ""}`}
       disabled={disabled}
       type={type ?? "submit"}
       onClick={handleClick}

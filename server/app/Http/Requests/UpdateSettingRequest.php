@@ -26,7 +26,7 @@ class UpdateSettingRequest extends FormRequest
         return [
             "currency" => ["nullable"],
             "company_name" => ["nullable"],
-            "image" => ["nullable"]
+            "vat" => ["nullable"]
         ];
     }
 }

@@ -9,6 +9,9 @@ import { useStoreBrandMutation } from "../../../features/apis/brandsApi";
 import { useNavigate } from "react-router-dom";
 import { ValidationError } from "../../../types/Validation";
 import Loader from "../../../components/Loaders/Loader";
+import { useTranslation } from "react-i18next";
+import GlobalError from "../../../components/GlobalError";
+import Form from "../../../components/Form/Form";
 
 const initialValues = {
   name: "",
@@ -18,6 +21,7 @@ const validationSchema = object({
 });
 
 const CreateBrand = () => {
+  const { t } = useTranslation();
   const [globalMessage, setGlobalMessage] = useState("");
   const navigate = useNavigate();
   const [createBrand, { isLoading }] = useStoreBrandMutation();
@@ -45,11 +49,9 @@ const CreateBrand = () => {
         }
 
         if (errors.data.errors) {
-          Object.entries(errors.data.errors).forEach(
-            ([key, errors]: [string, string[]]) => {
-              formik.setFieldError(key, errors[0]);
-            }
-          );
+          Object.entries(errors.data.errors).forEach(([key, errors]: [string, string[]]) => {
+            formik.setFieldError(key, errors[0]);
+          });
         }
       }
     },
@@ -57,30 +59,22 @@ const CreateBrand = () => {
 
   return (
     <div>
-      <Title title="Create Brand" />
-      <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-        {globalMessage && (
-          <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-            {globalMessage}
-          </div>
-        )}
-
-        <Input
-          handleChange={formik.handleChange}
-          handleBlur={formik.handleBlur}
-          name="name"
-          error={
-            formik.touched.name && formik.errors.name ? formik.errors.name : ""
-          }
-          placeholder="Name..."
-        />
-        <div className="max-w-lg">
-          <Button
-            disabled={isLoading}
-            content={isLoading ? <Loader /> : "Create Brand"}
+      <Title title={String(t("create")) + "  " + String(t("brand"))} />
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <GlobalError global_message={globalMessage} />
+          <Input
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="name"
+            error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
+            placeholder={t("name") + "..."}
           />
+          <div className="max-w-lg">
+            <Button disabled={isLoading} content={isLoading ? <Loader /> : String(t("create")) + "  " + String(t("brand"))} />
+          </div>
         </div>
-      </form>
+      </Form>
     </div>
   );
 };

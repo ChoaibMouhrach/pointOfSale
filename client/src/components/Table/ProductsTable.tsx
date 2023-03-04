@@ -1,19 +1,18 @@
-import React, { useState } from "react";
 import { UseQueryHookResult } from "@reduxjs/toolkit/dist/query/react/buildHooks";
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Table from "../../../components/Table/Table";
-import Title from "../../../components/Title";
-import { useDeleteProductMutation, useGetProductsQuery } from "../../../features/apis/productsApi";
-import { Paginate } from "../../../types/Pagination";
-import { Product } from "../../../types/Product";
-import Input from "../../../components/Input";
-import Search from "../../../components/Search";
-import Pagination from "../../../components/Pagination";
-import TablePagination from "../../../components/Table/TablePagination";
-import { useTranslation } from "react-i18next";
+import { useGetProductsQuery } from "../../features/apis/productsApi";
+import { Paginate } from "../../types/Pagination";
+import { Product } from "../../types/Product";
+import Search from "../Search";
+import Table from "./Table";
+import TablePagination from "./TablePagination";
 
-const Products = () => {
-  const { t } = useTranslation();
+type ProductsTableProps = {
+  handleAdd?: (data: any) => void;
+};
+
+const ProductsTable = ({ handleAdd }: ProductsTableProps) => {
   // setup
   const [searchParams] = useSearchParams();
 
@@ -24,16 +23,14 @@ const Products = () => {
   // constants
   const paginate = 8;
   const headers = [
-    { name: t("id"), key: "id", sort: true },
-    { name: t("name"), key: "name", sort: true },
-    { name: t("price"), key: "price", sort: true },
-    { name: t("cost"), key: "cost", sort: true },
-    { name: t("stock"), key: "stock", sort: true },
-    { name: t("createdat"), key: "created_at", sort: true },
+    { name: "id", key: "id", sort: true },
+    { name: "name", key: "name", sort: true },
+    { name: "price", key: "price", sort: true },
+    { name: "cost", key: "cost", sort: true },
+    { name: "stock", key: "stock", sort: true },
+    { name: "Created at", key: "created_at", sort: true },
   ];
 
-  // api requests
-  const [deleteProduct] = useDeleteProductMutation();
   const { data, isLoading, isSuccess, isFetching, refetch } = useGetProductsQuery<UseQueryHookResult<any> & { data: Paginate & { data: Product[] } }>({
     page,
     paginate,
@@ -65,25 +62,15 @@ const Products = () => {
     return [];
   }
 
-  // handle delete row
-  async function handleDelete(id: string) {
-    const response = await deleteProduct(id);
-
-    if (!("error" in response)) {
-      await refetch();
-    }
-  }
-
   return (
     <div className="flex flex-col gap-4">
-      <Title title={String(t("products"))} />
       <Search setSearch={setSearch} />
       <div className="bg-white dark:bg-dark-gray rounded-md">
-        <Table isLoading={isLoading || isFetching} headers={headers} rows={getRows()} handleDelete={handleDelete} displayEdit={true} />
+        <Table isLoading={isLoading || isFetching} headers={headers} rows={getRows()} handleAdd={handleAdd} />
         {isSuccess && <TablePagination lastPage={data.last_page} page={page} setPage={setPage} />}
       </div>
     </div>
   );
 };
 
-export default Products;
+export default ProductsTable;

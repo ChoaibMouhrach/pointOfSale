@@ -1,13 +1,13 @@
 import { User } from "../../types/User";
 import api from "./api";
-import { Login } from "../../types/Auth";
+import { Login, LoginResponse } from "../../types/Auth";
 
 const authApi = api.injectEndpoints({
   endpoints: (build) => ({
     getUserProfile: build.query<User, void>({
       query: () => "/profile",
     }),
-    authenticate: build.mutation<{ token: string; user: User }, Login>({
+    authenticate: build.mutation<LoginResponse, Login>({
       query: ({ email, password }: Login) => ({
         url: "/auth",
         method: "POST",
@@ -23,8 +23,4 @@ const authApi = api.injectEndpoints({
   }),
 });
 
-export const {
-  useAuthenticateMutation,
-  useLogoutMutation,
-  useGetUserProfileQuery,
-} = authApi;
+export const { useAuthenticateMutation, useLogoutMutation, useGetUserProfileQuery } = authApi;

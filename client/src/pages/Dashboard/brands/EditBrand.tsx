@@ -4,15 +4,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Title from "../../../components/Title";
-import {
-  useShowBrandQuery,
-  useUpdateBrandMutation,
-} from "../../../features/apis/brandsApi";
+import { useShowBrandQuery, useUpdateBrandMutation } from "../../../features/apis/brandsApi";
 import { Brand, UpdateBrand } from "../../../types/Brand";
 import Loader from "../../../components/Loaders/Loader";
 import { useFormik } from "formik";
 import { object, string } from "yup";
 import { ValidationError } from "../../../types/Validation";
+import { useTranslation } from "react-i18next";
+import Form from "../../../components/Form/Form";
+import GlobalError from "../../../components/GlobalError";
 
 const initialValues = {
   name: "",
@@ -26,12 +26,14 @@ const EditBrand = () => {
   const { id } = useParams();
   const [globalMessage, setGlobalMessage] = useState<string>("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  const [updateBrand, { isLoading: isUpdatingBrandLoading }] =
-    useUpdateBrandMutation();
-  const { data: brand, isSuccess } = useShowBrandQuery<
-    UseQueryHookResult<any> & { data: Brand }
-  >(Number(id), {
+  const [updateBrand, { isLoading: isUpdatingBrandLoading }] = useUpdateBrandMutation();
+  const {
+    data: brand,
+    isLoading: isBrandLoading,
+    isSuccess: isBrandSuccess,
+  } = useShowBrandQuery<UseQueryHookResult<any> & { data: Brand }>(Number(id), {
     refetchOnMountOrArgChange: true,
   });
 
@@ -54,11 +56,9 @@ const EditBrand = () => {
         };
 
         if (errors.data.errors) {
-          Object.entries(errors.data.errors).forEach(
-            ([key, errors]: [string, string[]]) => {
-              formik.setFieldError(key, errors[0]);
-            }
-          );
+          Object.entries(errors.data.errors).forEach(([key, errors]: [string, string[]]) => {
+            formik.setFieldError(key, errors[0]);
+          });
         }
         if (errors.data.message) {
           setGlobalMessage(errors.data.message);
@@ -69,35 +69,25 @@ const EditBrand = () => {
 
   return (
     <div>
-      <Title title="Edit Brand" />
-      {isSuccess && (
-        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-          {globalMessage && (
-            <div className="bg-danger h-12  lg:col-start-1 lg:col-end-4 flex items-center justify-center rounded-md">
-              {globalMessage}
-            </div>
-          )}
+      <Title title={String(t("edit")) + " " + String(t("brand"))} />
+      <Form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <GlobalError global_message={globalMessage} />
           <Input
-            handleChange={formik.handleChange}
-            handleBlur={formik.handleBlur}
-            error={
-              formik.touched.name && formik.errors.name
-                ? formik.errors.name
-                : ""
-            }
+            skelton={isBrandLoading}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.name && formik.errors.name ? formik.errors.name : ""}
             name="name"
-            defaultValue={brand.name}
-            placeholder="Brand Name"
+            defaultValue={isBrandSuccess ? brand.name : ""}
+            placeholder={String(t("name"))}
           />
 
           <div className="max-w-lg">
-            <Button
-              disabled={isUpdatingBrandLoading}
-              content={isUpdatingBrandLoading ? <Loader /> : "Update Brand"}
-            />
+            <Button disabled={isUpdatingBrandLoading} content={isUpdatingBrandLoading ? <Loader /> : String(t("update")) + "  " + String(t("brand"))} />
           </div>
-        </form>
-      )}
+        </div>
+      </Form>
     </div>
   );
 };

@@ -9,11 +9,7 @@ type PaginationProps = {
   set_page: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const Pagination = ({
-  page_count,
-  current_page,
-  set_page,
-}: PaginationProps) => {
+const Pagination = ({ page_count, current_page, set_page }: PaginationProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   return (

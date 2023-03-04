@@ -1,0 +1,112 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
+
+i18n
+  // detect user language
+  // learn more: https://github.com/i18next/i18next-browser-languageDetector
+  .use(LanguageDetector)
+  // pass the i18n instance to react-i18next.
+  .use(initReactI18next)
+  // init i18next
+  // for all options read: https://www.i18next.com/overview/configuration-options
+  .init({
+    debug: true,
+    fallbackLng: "en",
+    resources: {
+      it: {
+        translation: {
+          dashboard: "Cruscotto",
+          cart: "Carrello",
+          products: "Prodotti",
+          brands: "Marche",
+          categories: "Categorie",
+          units: "Unità",
+          sales: "Vendite",
+          purchases: "Acquisti",
+          suppliers: "Fornitori",
+          users: "Utenti",
+          logout: "Esci",
+          create: "Crea",
+          update: "Aggiorna",
+          total: "Totale",
+          today: "Oggi",
+          id: "ID",
+          name: "Nome",
+          price: "Prezzo",
+          cost: "Costo",
+          createdAt: "Creato il",
+          options: "Opzioni",
+          quantity: "Quantità",
+          pay: "Paga",
+          print: "Stampa",
+          close: "Chiudi",
+          product: "Prodotto",
+          receipt: "Ricevuta",
+          stock: "Magazzino",
+          unit: "Unità di misura",
+          brand: "Marca",
+          category: "Categoria",
+          shortname: "Nome breve",
+          "number of products": "Numero di prodotti",
+          earnings: "Guadagni",
+          empty: "Vuoto",
+          search: "Cerca",
+          supplier: "Fornitore",
+          email: "Email",
+          phone: "Telefono",
+          password: "Password",
+          confirmation: "Conferma",
+          edit: "Modificare",
+        },
+      },
+      en: {
+        translation: {
+          dashboard: "Dashboard",
+          cart: "Cart",
+          products: "Products",
+          brands: "Brands",
+          categories: "Categories",
+          units: "Units",
+          sales: "Sales",
+          purchases: "Purchases",
+          suppliers: "Suppliers",
+          users: "Users",
+          logout: "Logout",
+          create: "Create",
+          update: "Update",
+          total: "Total",
+          today: "Today",
+          id: "ID",
+          name: "Name",
+          price: "Price",
+          cost: "Cost",
+          createdAt: "Created At",
+          options: "Options",
+          quantity: "Quantity",
+          pay: "Pay",
+          print: "Print",
+          close: "Close",
+          product: "Product",
+          receipt: "Receipt",
+          stock: "Stock",
+          unit: "Unit of Measure",
+          brand: "Brand",
+          category: "Category",
+          shortname: "Short Name",
+          "number of products": "Number of Products",
+          earnings: "Earnings",
+          empty: "Empty",
+          search: "Search",
+          supplier: "Supplier",
+          email: "Email",
+          phone: "Phone",
+          password: "Password",
+          confirmation: "Confirmation",
+          edit: "Edit",
+        },
+      },
+    },
+  });
+
+export default i18n;

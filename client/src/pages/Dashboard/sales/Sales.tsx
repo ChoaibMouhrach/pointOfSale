@@ -1,14 +1,12 @@
 import { UseQueryHookResult } from "@reduxjs/toolkit/dist/query/react/buildHooks";
 import React, { useState } from "react";
+import Search from "../../../components/Search";
 import Table from "../../../components/Table/Table";
+import TablePagination from "../../../components/Table/TablePagination";
 import Title from "../../../components/Title";
-import {
-  useDeleteSaleMutation,
-  useGetSalesQuery,
-} from "../../../features/apis/salesApi";
+import { useDeleteSaleMutation, useGetSalesQuery } from "../../../features/apis/salesApi";
 import { Paginate } from "../../../types/Pagination";
 import { SaleProducts } from "../../../types/Sale";
-import { Headers } from "../../../types/Table";
 
 const Sales = () => {
   const [page, setPage] = useState(1);
@@ -22,27 +20,28 @@ const Sales = () => {
     isFetching,
     isSuccess,
     refetch,
-  } = useGetSalesQuery<
-    UseQueryHookResult<any> & { data: Paginate & { data: SaleProducts[] } }
-  >({
-    page,
-    search,
-    paginate,
-  });
+  } = useGetSalesQuery<UseQueryHookResult<any> & { data: Paginate & { data: SaleProducts[] } }>(
+    {
+      page,
+      search,
+      paginate,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
-  const headers: Headers = [
-    { name: "id", sort: true },
-    { name: "total Earnings", sort: true },
-    { name: "total Cost", sort: true },
-    { name: "number Of Products", sort: true },
-    { name: "Created At", sort: true },
+  const headers = [
+    { key: "id", name: "id", sort: true },
+    { key: "total_earnings", name: "total Earnings", sort: true },
+    { key: "total_cost", name: "total Cost", sort: true },
+    { key: "products_count", name: "number Of Products", sort: true },
+    { key: "created_at", name: "Created At", sort: true },
   ];
 
-  function getRows() {
+  function getRows(): { id: string; total_earnings: number; total_cost: number; products_count: number; created_at: string }[] {
     if (isSuccess) {
       return sales.data.map((sale: SaleProducts) => {
         return {
-          id: sale.id,
+          id: String(sale.id),
           total_earnings: sale.total_earnings ?? 0,
           total_cost: sale.total_cost ?? 0,
           products_count: sale.products_count,
@@ -60,21 +59,14 @@ const Sales = () => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <Title title="Sales" />
-      <Table
-        headers={headers}
-        search={search}
-        displayEdit={true}
-        displayDelete={true}
-        handleDelete={handleDelete}
-        setSearch={setSearch}
-        rows={getRows()}
-        is_loading={isLoading || isFetching}
-        page_count={sales?.last_page ?? null}
-        current_page={page}
-        set_page={setPage}
-      />
+      <Search setSearch={setSearch} />
+
+      <div className="bg-white dark:bg-dark-gray rounded-md">
+        <Table isLoading={isLoading || isFetching} headers={headers} rows={getRows()} displayEdit={true} handleDelete={handleDelete} />
+        {isSuccess && <TablePagination page={page} setPage={setPage} lastPage={sales.last_page} />}
+      </div>
     </div>
   );
 };

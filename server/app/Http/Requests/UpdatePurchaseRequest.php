@@ -27,7 +27,7 @@ class UpdatePurchaseRequest extends FormRequest
             "supplier_id" => ["nullable", "exists:suppliers,id"],
             "products" => ["nullable", 'array'],
             "products.*.id" => ["required", "exists:products,id"],
-            "products.*.total_price" => ["nullable", "numeric"],
+            "products.*.total_cost" => ["nullable", "numeric"],
             "products.*.quantity" => ["nullable", "numeric"]
         ];
     }

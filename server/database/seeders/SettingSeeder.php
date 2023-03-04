@@ -18,7 +18,7 @@ class SettingSeeder extends Seeder
         Setting::create([
             "currency" => "$",
             "company_name" => "reqo",
-            "image" => "some image",
+            "vat" => "465465432"
         ]);
     }
 }
